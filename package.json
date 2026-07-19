@@ -1,0 +1,22 @@
+{
+  "name": "zenith-smoke-bot",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Bedrock protocol smoke client for Zenith (separate repo — ADR §58). Bun + bedrock-protocol.",
+  "type": "module",
+  "module": "src/join.ts",
+  "scripts": {
+    "smoke:join": "bun run src/join.ts",
+    "smoke": "bun run src/join.ts"
+  },
+  "engines": {
+    "bun": ">=1.1"
+  },
+  "dependencies": {
+    "bedrock-protocol": "^3.57.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  }
+}
