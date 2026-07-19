@@ -52,11 +52,33 @@ bun run smoke:join
 
 Exit **0** = spawn reached. Exit **1** = timeout / kick / error.
 
+## Priority smokes (first 10 — do not expand early)
+
+Wire-level only. Human Gate A still owns UI mesh / crack feel / lid visuals.
+
+| # | Id | Assert (bot) | Status |
+|---|----|--------------|--------|
+| 1 | `join` | Offline connect → `start_game` → `spawn` | **Implemented** (`bun run smoke:join`) |
+| 2 | `place` | Place allowlisted block on air cell → see server `update_block` (or world truth via inventory consume) | Planned |
+| 3 | `break` | Break stone/dirt → inventory or floor-drop path; cell becomes air | Planned |
+| 4 | `inv-hotbar` | Hotbar/content sync after place consume (stack count drops) | Planned |
+| 5 | `respawn` | Move below void → death/respawn handshake → back at spawn; bag intact | Planned |
+| 6 | `chest-open` | Open single chest → container open + 27 content | Planned |
+| 7 | `double-chest` | Pair present → open either half → **54** slots on wire | Planned |
+| 8 | `dig-timing` | Survival dig with tool → break only after required ticks (reject early) | Planned |
+| 9 | `graceful-persist` | Place + chest write → SIGTERM flush → reconnect → overlays/`ct:` still there | Planned (needs LevelDB `world.path`) |
+| 10 | `two-client` | Bot A places → Bot B (second client) receives `update_block` | Planned |
+
+**Out of first 10:** skin, emote, soft entity edge cases, SoftCap grief, Xbox auth, launcher UI.
+
+**Debt rule:** when Zenith bumps `ServerIdentity.ProtocolVersion` / `VersionName`, bump this repo’s `ZENITH_BOT_VERSION` / minecraft-data pin in the **same** change window — do not let the bot lag silently.
+
 ## Scope
 
-- **Now:** `smoke:join` — login path.
-- **Next:** place / dig / chest open (wire steps mirroring Zenith Gate A; not UI mesh).
+- **Now:** #1 `join`.
+- **Next:** #2–#4 (place/break/inv), then chest / dig / persist / two-client.
 - **Not this repo:** Bedrock Launcher mods; Xbox CI auth; replacing human Gate A for tags.
+
 
 ## CI
 
