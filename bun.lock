@@ -6,6 +6,7 @@
       "name": "zenith-smoke-bot",
       "dependencies": {
         "bedrock-protocol": "^3.57.0",
+        "jsp-raknet": "^2.2.0",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -13,6 +14,9 @@
       },
     },
   },
+  "trustedDependencies": [
+    "raknet-native",
+  ],
   "packages": {
     "@azure/msal-common": ["@azure/msal-common@14.16.1", "", {}, "sha512-nyxsA6NA4SVKh5YyRpbSXiMr7oQbwark7JU9LMeg6tJYTSPyAGkdx61wPT4gyxZfxlSxMMEyAsWaubBlNyIa1w=="],
 

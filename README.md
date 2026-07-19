@@ -22,6 +22,8 @@ Override with `ZENITH_BOT_VERSION` if needed.
 2. Zenith listening (UDP `19132`) with `auth.accept` including `offline` (LAN sample default)
 3. `bun install` in this repo
 
+Uses **`jsp-raknet`** (pure JS) so you do not need g++/cmake for `raknet-native`.
+
 ## Commands
 
 ```bash
