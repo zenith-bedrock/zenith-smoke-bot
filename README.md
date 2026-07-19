@@ -19,10 +19,17 @@ Override with `ZENITH_BOT_VERSION` if needed.
 ## Prerequisites
 
 1. Bun ≥ 1.1 (`curl -fsSL https://bun.sh/install | bash`)
-2. Zenith listening (UDP `19132`) with `auth.accept` including `offline` (LAN sample default)
-3. `bun install` in this repo
+2. System C++ toolchain once (`g++` / `cmake`) so `raknet-native` can build
+3. Zenith listening (UDP `19132`) with `auth.accept` including `offline`
+4. In this repo:
 
-Uses **`jsp-raknet`** (pure JS) so you do not need g++/cmake for `raknet-native`.
+```bash
+bun install
+bun pm trust raknet-native   # run native install script (blocked by default)
+bun run smoke:join
+```
+
+Default RakNet backend is **`raknet-native`**. Pure JS (`ZENITH_RAKNET=jsp-raknet`) currently fails CRA address parse against Zenith’s RakNet — do not use for smoke until fixed.
 
 ## Commands
 
