@@ -1,5 +1,6 @@
 import bedrock from "bedrock-protocol";
 import { config } from "./config.ts";
+import type { ConnectCapture } from "./types.ts";
 
 export type RakBackend = "raknet-native" | "jsp-raknet";
 
@@ -11,8 +12,17 @@ export function rakBackend(): RakBackend {
 
 export type SmokeClient = ReturnType<typeof bedrock.createClient>;
 
+export type ConnectOptions = {
+  /** Merged into ClientData JWT (SkinData base64, SkinImageWidth, …). */
+  skinData?: Record<string, unknown>;
+};
+
 /** Connect offline and resolve on spawn (rejects on timeout/error/kick). */
-export function connectUntilSpawn(username: string): Promise<SmokeClient> {
+export function connectUntilSpawn(
+  username: string,
+  capture?: ConnectCapture,
+  options?: ConnectOptions,
+): Promise<SmokeClient> {
   const backend = rakBackend();
   return new Promise((resolve, reject) => {
     let settled = false;
@@ -35,7 +45,7 @@ export function connectUntilSpawn(username: string): Promise<SmokeClient> {
     };
 
     try {
-      client = bedrock.createClient({
+      const opts: Record<string, unknown> = {
         host: config.host,
         port: config.port,
         username,
@@ -44,7 +54,9 @@ export function connectUntilSpawn(username: string): Promise<SmokeClient> {
         raknetBackend: backend,
         skipPing: true,
         connectTimeout: config.timeoutMs,
-      });
+      };
+      if (options?.skinData) opts.skinData = options.skinData;
+      client = bedrock.createClient(opts as Parameters<typeof bedrock.createClient>[0]);
     } catch (err) {
       reject(
         new Error(
@@ -53,6 +65,28 @@ export function connectUntilSpawn(username: string): Promise<SmokeClient> {
         ),
       );
       return;
+    }
+
+    if (capture) {
+      client.on("start_game", (p: any) => {
+        if (p?.player_position) {
+          capture.pose.x = p.player_position.x;
+          capture.pose.y = p.player_position.y;
+          capture.pose.z = p.player_position.z;
+        }
+        if (p?.rotation) {
+          capture.pose.yaw = p.rotation.x ?? capture.pose.yaw;
+          capture.pose.pitch = p.rotation.y ?? capture.pose.pitch;
+        }
+        if (p?.runtime_entity_id != null) {
+          capture.runtimeEntityId = p.runtime_entity_id;
+        }
+      });
+      client.on("inventory_content", (p: any) => {
+        if (p?.window_id === "inventory" || p?.window_id === 0) {
+          capture.inventory = Array.isArray(p.input) ? [...p.input] : [];
+        }
+      });
     }
 
     const timer = setTimeout(() => {

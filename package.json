@@ -8,6 +8,23 @@
   "scripts": {
     "smoke:join": "bun run src/join.ts",
     "smoke:skin": "bun run src/skin.ts",
+    "smoke:place": "bun run src/place.ts",
+    "smoke:break": "bun run src/break.ts",
+    "smoke:inv-hotbar": "bun run src/invHotbar.ts",
+    "smoke:respawn": "bun run src/respawn.ts",
+    "smoke:chest-open": "bun run src/chestOpen.ts",
+    "smoke:double-chest": "bun run src/doubleChest.ts",
+    "smoke:dig-timing": "bun run src/digTiming.ts",
+    "smoke:persist": "bun run src/persist.ts",
+    "smoke:two-client": "bun run src/twoClient.ts",
+    "smoke:peer-ground": "bun run src/peerGround.ts",
+    "smoke:dig-idle": "bun run src/digIdle.ts",
+    "smoke:gamemode-peer": "bun run src/gamemodePeer.ts",
+    "smoke:floor-pickup": "bun run src/floorPickup.ts",
+    "smoke:join-skin": "bun run src/joinSkin.ts",
+    "smoke:sound": "bun run src/sound.ts",
+    "smoke:first10": "bun run src/first10.ts",
+    "smoke:wave2": "bun run src/wave2.ts",
     "smoke": "bun run src/join.ts"
   },
   "engines": {
