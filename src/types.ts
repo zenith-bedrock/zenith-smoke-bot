@@ -23,4 +23,6 @@ export type ConnectCapture = {
   pose: Pose;
   runtimeEntityId: bigint | number | string;
   inventory: WireItem[];
+  /** StartGame player gamemode when present (0 survival / 1 creative). */
+  gameMode?: number;
 };

@@ -70,6 +70,7 @@ ZENITH_SMOKE_INCLUDE_PERSIST=1 ZENITH_PROJECT=/path/to/zenith bun run smoke:wave
 | `smoke:join-skin` | wave-2 — login ClientData skin on PlayerList ADD |
 | `smoke:sound` | wave-2 — peer `level_sound_event` place |
 | `smoke:gravity` | wave-2 — sand fall + tower cascade + gravel fall (§57) |
+| `smoke:reconnect-pose` | wave-2 — quit/rejoin restores feet + creative (§60) |
 | `smoke:skin` | bonus — mid-game PlayerSkin relay (§49) |
 | `smoke:first10` | sequential first wave |
 | `smoke:wave2` | sequential wave-2 (persist opt-in) |
@@ -124,6 +125,7 @@ Wire-level only. Human Gate A still owns UI mesh / crack feel / lid visuals.
 | `join-skin` | Login skin MAGIC on peer PlayerList ADD | **Implemented** |
 | `sound` | Peer hears `level_sound_event` `"place"` | **Implemented** |
 | `gravity` | Sand fall + tower cascade + gravel fall (§57) | **Implemented** |
+| `reconnect-pose` | Quit/rejoin restores feet near last AuthInput pose (§60) | **Implemented** |
 
 **Bonus:** `smoke:skin` — two bots mid-game PlayerSkin relay (§49).
 

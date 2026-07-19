@@ -24,6 +24,7 @@
     "smoke:join-skin": "bun run src/joinSkin.ts",
     "smoke:sound": "bun run src/sound.ts",
     "smoke:gravity": "bun run src/gravity.ts",
+    "smoke:reconnect-pose": "bun run src/reconnectPose.ts",
     "smoke:first10": "bun run src/first10.ts",
     "smoke:wave2": "bun run src/wave2.ts",
     "smoke": "bun run src/join.ts"

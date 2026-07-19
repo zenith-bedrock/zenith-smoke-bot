@@ -22,6 +22,8 @@ export type SmokeSession = {
   runtimeEntityId: bigint | number | string;
   /** Latest main inventory (window "inventory") — 36 slots. */
   inventory: WireItem[];
+  /** StartGame gamemode when captured (0 survival / 1 creative). */
+  gameMode?: number;
 };
 
 export function airItem(): { network_id: 0 } {
@@ -103,6 +105,7 @@ export async function openSession(
     pose: feet,
     runtimeEntityId: capture.runtimeEntityId,
     inventory: [...capture.inventory],
+    gameMode: capture.gameMode,
   };
 
   client.on("inventory_content", (p: any) => {

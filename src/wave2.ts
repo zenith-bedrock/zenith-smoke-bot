@@ -12,6 +12,7 @@ const steps = [
   "smoke:join-skin",
   "smoke:sound",
   "smoke:gravity",
+  "smoke:reconnect-pose",
 ];
 
 if (process.env.ZENITH_SMOKE_INCLUDE_PERSIST === "1") {

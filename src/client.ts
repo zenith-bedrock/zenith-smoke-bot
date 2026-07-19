@@ -81,6 +81,19 @@ export function connectUntilSpawn(
         if (p?.runtime_entity_id != null) {
           capture.runtimeEntityId = p.runtime_entity_id;
         }
+        const raw = p?.player_gamemode ?? p?.player_game_type ?? p?.gamemode;
+        if (raw != null) {
+          if (typeof raw === "number") capture.gameMode = raw;
+          else if (typeof raw === "string") {
+            const s = raw.toLowerCase();
+            if (s === "creative" || s === "1") capture.gameMode = 1;
+            else if (s === "survival" || s === "0") capture.gameMode = 0;
+            else {
+              const n = Number(raw);
+              if (!Number.isNaN(n)) capture.gameMode = n;
+            }
+          }
+        }
       });
       client.on("inventory_content", (p: any) => {
         if (p?.window_id === "inventory" || p?.window_id === 0) {
