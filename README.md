@@ -27,9 +27,12 @@ Override with `ZENITH_BOT_VERSION` if needed.
 bun install
 bun pm trust raknet-native   # run native install script (blocked by default)
 bun run smoke:join
+bun run smoke:skin
 ```
 
 Default RakNet backend is **`raknet-native`**. Pure JS (`ZENITH_RAKNET=jsp-raknet`) currently fails CRA address parse against Zenith’s RakNet — do not use for smoke until fixed.
+
+**UUID note:** Zenith `BinaryStream` UUID wire ≠ plain RFC bytes that `bedrock-protocol` writes. Skin smoke uses `toZenithWireUuidString()` so inbound `PlayerSkin` UUID matches `Player.Uuid` (§49).
 
 ## Commands
 
@@ -40,45 +43,46 @@ dotnet run -c Release --project src/zenith/zenith.csproj
 # terminal B
 bun install
 bun run smoke:join
+bun run smoke:skin   # two clients; A→server→B PlayerSkin relay
 ```
 
 | Env | Default |
 |-----|---------|
 | `ZENITH_HOST` | `127.0.0.1` |
 | `ZENITH_PORT` | `19132` |
-| `ZENITH_BOT_USERNAME` | `ZenithSmoke` |
+| `ZENITH_BOT_USERNAME` | `ZenithSmoke` (join only) |
+| `ZENITH_BOT_A` / `ZENITH_BOT_B` | `SmokeSkinA` / `SmokeSkinB` (skin only) |
 | `ZENITH_BOT_VERSION` | `1.26.30` |
 | `ZENITH_SMOKE_TIMEOUT_MS` | `30000` |
 
-Exit **0** = spawn reached. Exit **1** = timeout / kick / error.
+Exit **0** = success. Exit **1** = timeout / kick / assert fail.
 
-## Priority smokes (first 10 — do not expand early)
+## Priority smokes (first wave — do not expand early)
 
 Wire-level only. Human Gate A still owns UI mesh / crack feel / lid visuals.
 
 | # | Id | Assert (bot) | Status |
 |---|----|--------------|--------|
 | 1 | `join` | Offline connect → `start_game` → `spawn` | **Implemented** (`bun run smoke:join`) |
-| 2 | `place` | Place allowlisted block on air cell → see server `update_block` (or world truth via inventory consume) | Planned |
-| 3 | `break` | Break stone/dirt → inventory or floor-drop path; cell becomes air | Planned |
-| 4 | `inv-hotbar` | Hotbar/content sync after place consume (stack count drops) | Planned |
-| 5 | `respawn` | Move below void → death/respawn handshake → back at spawn; bag intact | Planned |
-| 6 | `chest-open` | Open single chest → container open + 27 content | Planned |
-| 7 | `double-chest` | Pair present → open either half → **54** slots on wire | Planned |
-| 8 | `dig-timing` | Survival dig with tool → break only after required ticks (reject early) | Planned |
-| 9 | `graceful-persist` | Place + chest write → SIGTERM flush → reconnect → overlays/`ct:` still there | Planned (needs LevelDB `world.path`) |
-| 10 | `two-client` | Bot A places → Bot B (second client) receives `update_block` | Planned |
+| 2 | `skin-relay` | Two bots: A `player_skin` → B receives same classic RGBA (§49) | **Implemented** (`bun run smoke:skin`) |
+| 3 | `place` | Place allowlisted block → `update_block` | Planned |
+| 4 | `break` | Break → inventory or floor-drop; cell air | Planned |
+| 5 | `inv-hotbar` | Stack count drops after place | Planned |
+| 6 | `respawn` | Void → death/respawn → spawn; bag intact | Planned |
+| 7 | `chest-open` | Single chest → 27 content | Planned |
+| 8 | `double-chest` | Pair → **54** slots on wire | Planned |
+| 9 | `dig-timing` | Survival dig rejects early break | Planned |
+| 10 | `graceful-persist` / peer place | LevelDB flush **or** B sees A's place | Planned |
 
-**Out of first 10:** skin, emote, soft entity edge cases, SoftCap grief, Xbox auth, launcher UI.
+**Out of first wave:** persona-complete join skins, SoftCap grief, Xbox auth, launcher UI.
 
 **Debt rule:** when Zenith bumps `ServerIdentity.ProtocolVersion` / `VersionName`, bump this repo’s `ZENITH_BOT_VERSION` / minecraft-data pin in the **same** change window — do not let the bot lag silently.
 
 ## Scope
 
-- **Now:** #1 `join`.
-- **Next:** #2–#4 (place/break/inv), then chest / dig / persist / two-client.
+- **Now:** #1 `join`, #2 `skin-relay`.
+- **Next:** #3–#5 (place/break/inv), then chest / dig / persist.
 - **Not this repo:** Bedrock Launcher mods; Xbox CI auth; replacing human Gate A for tags.
-
 
 ## CI
 
