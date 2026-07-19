@@ -11,6 +11,7 @@ const steps = [
   "smoke:floor-pickup",
   "smoke:join-skin",
   "smoke:sound",
+  "smoke:gravity",
 ];
 
 if (process.env.ZENITH_SMOKE_INCLUDE_PERSIST === "1") {
