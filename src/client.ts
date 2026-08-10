@@ -57,6 +57,10 @@ export function connectUntilSpawn(
       };
       if (options?.skinData) opts.skinData = options.skinData;
       client = bedrock.createClient(opts as Parameters<typeof bedrock.createClient>[0]);
+      // Claim Zenith's real protocol on the wire while keeping the nearest-supported
+      // packet schema (config.version) for encode/decode — see config.ts for why.
+      (client as unknown as { options: { protocolVersion: number } }).options.protocolVersion =
+        config.protocolVersion;
     } catch (err) {
       reject(
         new Error(

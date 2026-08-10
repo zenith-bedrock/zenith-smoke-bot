@@ -6,15 +6,19 @@ Protocol smoke client for **[Zenith](https://github.com/zenith-bedrock/zenith)**
 
 ## Why not inside `zenith/`
 
-Mixing Node/TS into the server tree blurs leaf boundaries and review surface. This repo tracks Zenith’s wire pin (`protocol 1001` / game ~`1.26.33`) without living under `src/zenith`.
+Mixing Node/TS into the server tree blurs leaf boundaries and review surface. This repo tracks Zenith’s wire pin (`protocol 2169` / game `1.26.50`, zenith ADR §79) without living under `src/zenith`.
 
 ## Version pin
 
-| Zenith (`ServerIdentity`) | Bot default |
-|---------------------------|-------------|
-| Protocol **1001** / VersionName **1.26.33** | `1.26.30` (minecraft-data; same protocol **1001**) |
+| Zenith (`ServerIdentity`) | Bot `version` (packet schema) | Bot `protocolVersion` (what's on the wire) |
+|---------------------------|--------------------------------|---------------------------------------------|
+| Protocol **2169** / VersionName **1.26.50** | `1.26.40` — nearest `bedrock-protocol` actually ships | `2169` — overridden post-`createClient()`, see below |
 
-Override with `ZENITH_BOT_VERSION` if needed.
+**Deliberate mismatch, not a bug.** No release of `bedrock-protocol` (nor its `minecraft-data` dependency) has cataloged protocol 2169 yet — checked directly against the latest of both (`bedrock-protocol@3.58.0`, `minecraft-data@3.113.0`): newest available is **1.26.40 / protocol 2168**. This isn't specific to this library — gophertunnel, `bedrock-v/protocol`, and Endstone are all at 2168 too (zenith ADR §81); nobody in the ecosystem has 2169 yet.
+
+`client.ts` / `join.ts` set `client.options.protocolVersion = 2169` right after `bedrock.createClient()` returns (before any handshake bytes are actually sent — `protocolVersion` is read lazily). This makes the bot claim Zenith's real protocol number, passing Zenith's exact-match `ProtocolGate`, while its packet serializer/deserializer stays on the nearest real schema the library ships (`1.26.40`).
+
+**What this does and doesn't validate:** everything **not** on Zenith's Cereal-migration list (`docs/roadmap.md` in the zenith repo — join, place, break, inventory, chests, dig timing, persist, gravity, sound, …) is validated for real. Packets Zenith has migrated to the 2169 Cereal shape (`AddPlayerPacket`, `AddItemActorPacket`, `SetActorDataPacket` as of zenith ADR §82; more as that list closes) are encoded/decoded by this bot using the *old* pre-2168 shape — a decode error on one of those specific packets is not proof of a Zenith bug, it may just be this bot's own staleness. Override with `ZENITH_BOT_VERSION` / `ZENITH_BOT_PROTOCOL_VERSION` if needed.
 
 ## Prerequisites
 
@@ -81,7 +85,8 @@ ZENITH_SMOKE_INCLUDE_PERSIST=1 ZENITH_PROJECT=/path/to/zenith bun run smoke:wave
 | `ZENITH_PORT` | `19132` |
 | `ZENITH_BOT_USERNAME` | per-smoke default |
 | `ZENITH_BOT_A` / `ZENITH_BOT_B` | two-client / skin |
-| `ZENITH_BOT_VERSION` | `1.26.30` |
+| `ZENITH_BOT_VERSION` | `1.26.40` |
+| `ZENITH_BOT_PROTOCOL_VERSION` | `2169` |
 | `ZENITH_SMOKE_TIMEOUT_MS` | `30000` |
 | `ZENITH_PROJECT` | (optional) zenith checkout for persist auto-restart |
 | `ZENITH_SMOKE_PERSIST_PHASE` | `auto` \| `place` \| `verify` |
@@ -131,7 +136,11 @@ Wire-level only. Human Gate A still owns UI mesh / crack feel / lid visuals.
 
 **Out of bot scope:** SoftCap grief, Xbox auth, launcher UI, persona-complete skins beyond MAGIC.
 
-**Debt rule:** when Zenith bumps `ServerIdentity.ProtocolVersion` / `VersionName`, bump this repo’s `ZENITH_BOT_VERSION` / minecraft-data pin in the **same** change window — do not let the bot lag silently.
+**Debt rule:** when Zenith bumps `ServerIdentity.ProtocolVersion` / `VersionName`, bump this repo's `ZENITH_BOT_VERSION` / minecraft-data pin in the **same** change window — do not let the bot lag silently. If `bedrock-protocol` itself hasn't cataloged the new protocol yet (the current situation at 2169 — see "Version pin" above), bump `ZENITH_BOT_PROTOCOL_VERSION` to match anyway so the handshake still passes Zenith's gate, and note the mismatch in this README rather than letting the bot silently stop connecting.
+
+## Known issues
+
+- **`ItemRegistryPacket` decode failure.** As of the 2169 protocol-version override (see "Version pin"), `smoke:join` gets past `start_game` but fails decoding the following `item_registry` packet: `array size is abnormally large, not reading: <garbage>`. `ItemRegistryPacket` is not on Zenith's Cereal-migration list, so this isn't the known bot/server version mismatch — likely a real per-entry NBT encoding gap on one side or the other. Not yet root-caused (zenith roadmap.md Yes-next priority 7). `first10`/`wave2` won't pass until this is fixed.
 
 ## Scope
 

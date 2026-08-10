@@ -47,6 +47,10 @@ try {
     skipPing: true,
     connectTimeout: config.timeoutMs,
   });
+  // Claim Zenith's real protocol on the wire while keeping the nearest-supported
+  // packet schema (config.version) for encode/decode — see config.ts for why.
+  (client as unknown as { options: { protocolVersion: number } }).options.protocolVersion =
+    config.protocolVersion;
 } catch (err) {
   finish(
     1,
