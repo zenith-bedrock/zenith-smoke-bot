@@ -5,6 +5,8 @@ node_modules
 out
 dist
 *.tgz
+capture/
+*.hex
 
 # code coverage
 coverage

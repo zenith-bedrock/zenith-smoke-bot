@@ -140,7 +140,10 @@ Wire-level only. Human Gate A still owns UI mesh / crack feel / lid visuals.
 
 ## Known issues
 
-- **`ItemRegistryPacket` decode failure.** As of the 2169 protocol-version override (see "Version pin"), `smoke:join` gets past `start_game` but fails decoding the following `item_registry` packet: `array size is abnormally large, not reading: <garbage>`. `ItemRegistryPacket` is not on Zenith's Cereal-migration list, so this isn't the known bot/server version mismatch — likely a real per-entry NBT encoding gap on one side or the other. Not yet root-caused (zenith roadmap.md Yes-next priority 7). `first10`/`wave2` won't pass until this is fixed.
+- **`CraftingDataPacket` decode failure.** `smoke:join` gets past `start_game` and `item_registry` (both decode cleanly) and `creative_content` (fixed — see below), then fails decoding `crafting_data`: `Missing characters in string, found size is 164 expected size was 215`. Root-caused: at 1.26.40+ this packet's wire shape genuinely restructured from one combined recipe array (each entry tagged with its own type) into separate per-type arrays (`shaped_recipes`, `shapeless_recipes`, `multi_recipes`, `shulker_box_recipes`, …, `potion_type_recipes`, `material_reducers`, `clear_recipes`), and `RecipeIngredient` moved to a nested tagged-descriptor model. Not a small fix — needs the same multi-reference care as a Cereal-migration packet (zenith ADR §85, zenith roadmap.md Yes-next). Not fixed yet; blocks `first10`/`wave2`.
+- **Fixed:** `CreativeContentPacket`'s `category` field was a fixed 4-byte int32 on the Zenith side when the wire expects a single byte (`mapper<u8>`) — every group after the first was writing 3 extra bytes, and by the `items` array the whole packet was unreadable garbage (`array size is abnormally large`). Found with `debug:capture` below; fixed server-side (zenith ADR §85).
+
+**Debug tool:** `bun run debug:capture` connects and dumps every inbound game packet's raw hex to `./capture/pkt_NNN.hex` (override with `ZENITH_DEBUG_CAPTURE_DIR`), logging each packet's id/length *before* attempting to deserialize it. Since each Bedrock game packet is independently framed, this is how the `CreativeContentPacket` bug above was isolated — a decode error names the packet that's actually wrong, but only once you can see which packet decoded fine immediately before it.
 
 ## Scope
 
