@@ -114,7 +114,18 @@ export function connectUntilSpawn(
       );
     }, config.timeoutMs);
 
-    client.on("error", (err: Error) => done(err));
+    client.on("error", (err: Error) => {
+      // Fires for the whole client lifetime, not just pre-spawn: once `done()` has
+      // already settled (spawn already resolved), silently returning here was masking
+      // real post-spawn transport errors — e.g. a RakNet delivery failure during
+      // smoke:respawn showed up as a plain waitForPacket timeout with zero diagnostic,
+      // because this handler ate the actual error event first.
+      if (settled) {
+        console.error(`event: post-spawn client error (${username}):`, err.message ?? err);
+        return;
+      }
+      done(err);
+    });
     client.on("kick", (reason: unknown) =>
       done(
         new Error(
