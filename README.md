@@ -55,6 +55,24 @@ bun run smoke:wave2            # peer/dig-idle/gamemode/floor/skin/sound
 ZENITH_SMOKE_INCLUDE_PERSIST=1 ZENITH_PROJECT=/path/to/zenith bun run smoke:wave2
 ```
 
+### Differential behavioral validation
+
+`smoke:differential-join` connects the same offline client to a Zenith endpoint and a reference
+endpoint, then compares only the neutral observable result: join/spawn success. Runtime IDs,
+packet batching, packet order outside the semantic handshake, and timing are diagnostics rather
+than byte-for-byte compatibility requirements.
+
+```bash
+DIFF_ZENITH_PORT=19135 \
+DIFF_REFERENCE_PORT=19136 \
+DIFF_REFERENCE_PROTOCOL_VERSION=2168 \
+bun run smoke:differential-join
+```
+
+The reference default protocol is 2168 because `bedrock-protocol` currently ships the 1.26.40
+schema. A reference that requires an unsupported schema is reported as **INCONCLUSIVE** — never
+as a Zenith gameplay regression.
+
 | Script | Id |
 |--------|-----|
 | `smoke:join` | #1 join → spawn |

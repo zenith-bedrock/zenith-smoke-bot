@@ -7,6 +7,7 @@
   "module": "src/join.ts",
   "scripts": {
     "smoke:join": "bun run src/join.ts",
+    "smoke:differential-join": "bun run src/differentialJoin.ts",
     "smoke:skin": "bun run src/skin.ts",
     "smoke:place": "bun run src/place.ts",
     "smoke:break": "bun run src/break.ts",

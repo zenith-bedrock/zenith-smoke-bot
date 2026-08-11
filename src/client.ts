@@ -17,11 +17,31 @@ export type ConnectOptions = {
   skinData?: Record<string, unknown>;
 };
 
+/** Endpoint and wire pin for one side of a differential smoke scenario. */
+export type SmokeTarget = {
+  name: string;
+  host: string;
+  port: number;
+  version: string;
+  protocolVersion: number;
+  timeoutMs: number;
+};
+
+const defaultTarget: SmokeTarget = {
+  name: "Zenith",
+  host: config.host,
+  port: config.port,
+  version: config.version,
+  protocolVersion: config.protocolVersion,
+  timeoutMs: config.timeoutMs,
+};
+
 /** Connect offline and resolve on spawn (rejects on timeout/error/kick). */
 export function connectUntilSpawn(
   username: string,
   capture?: ConnectCapture,
   options?: ConnectOptions,
+  target: SmokeTarget = defaultTarget,
 ): Promise<SmokeClient> {
   const backend = rakBackend();
   return new Promise((resolve, reject) => {
@@ -46,11 +66,11 @@ export function connectUntilSpawn(
 
     try {
       const opts: Record<string, unknown> = {
-        host: config.host,
-        port: config.port,
+        host: target.host,
+        port: target.port,
         username,
         offline: true,
-        version: config.version,
+        version: target.version,
         raknetBackend: backend,
         skipPing: true,
         connectTimeout: config.timeoutMs,
@@ -60,7 +80,7 @@ export function connectUntilSpawn(
       // Claim Zenith's real protocol on the wire while keeping the nearest-supported
       // packet schema (config.version) for encode/decode — see config.ts for why.
       (client as unknown as { options: { protocolVersion: number } }).options.protocolVersion =
-        config.protocolVersion;
+        target.protocolVersion;
     } catch (err) {
       reject(
         new Error(
@@ -109,10 +129,10 @@ export function connectUntilSpawn(
     const timer = setTimeout(() => {
       done(
         new Error(
-          `timeout spawn for ${username} after ${config.timeoutMs}ms`,
+          `timeout spawn for ${username} after ${target.timeoutMs}ms`,
         ),
       );
-    }, config.timeoutMs);
+    }, target.timeoutMs);
 
     client.on("error", (err: Error) => {
       // Fires for the whole client lifetime, not just pre-spawn: once `done()` has
