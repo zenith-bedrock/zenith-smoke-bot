@@ -161,12 +161,20 @@ try {
     (p.attributes ?? []).some((x: any) => x.name === "minecraft:health" && Number(x.current) < 20), 10_000);
   const bRemoved = waitForPacket<any>(b, "remove_entity", (p) => String(p.entity_id_self ?? p.entity_id ?? p.runtime_entity_id) === String(bState.runtimeId), 10_000);
   const aRemoved = waitForPacket<any>(a, "remove_entity", (p) => String(p.entity_id_self ?? p.entity_id ?? p.runtime_entity_id) === String(aState.runtimeId), 10_000);
+  // Loot is a distinct item actor. Match the death position instead of depending on a
+  // library-specific item-stack field name in the decoded packet.
+  const bLoot = waitForPacket<any>(b, "add_item_entity", (p) => {
+    const pos = p.position;
+    return pos != null &&
+      Math.abs(pos.x - bState.position.x) < 4 &&
+      Math.abs(pos.z - bState.position.z) < 4;
+  }, 10_000);
 
   for (let i = 0; i < 5; i++) { clickAir(a); await waitMs(350); }
-  await Promise.all([bDamaged, aDamaged, bRemoved, aRemoved]);
+  await Promise.all([bDamaged, aDamaged, bRemoved, aRemoved, bLoot]);
   await waitMs(500);
   if (aObservation.removes !== 1 || bState.removes !== 1) throw new Error(`expected one removal per observer; A=${aObservation.removes} B=${bState.removes}`);
-  finish(0, `OK: zombie rid=${String(aState.runtimeId)} moved; both clients observed health and one removal`, a, b);
+  finish(0, `OK: zombie rid=${String(aState.runtimeId)} moved; both clients observed health, one removal, and death loot`, a, b);
 } catch (err) {
   finish(1, `${err instanceof Error ? err.message : String(err)}; A health=${aObservation?.health.join(",") ?? "n/a"}; B health=${bObservation?.health.join(",") ?? "n/a"}`, a, b);
 }
