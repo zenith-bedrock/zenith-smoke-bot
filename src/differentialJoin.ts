@@ -29,8 +29,8 @@ const defaults: SmokeTarget = {
   name: "Zenith",
   host: process.env.ZENITH_HOST ?? "127.0.0.1",
   port: Number(process.env.ZENITH_PORT ?? "19132"),
-  version: process.env.ZENITH_BOT_VERSION ?? "1.26.40",
-  protocolVersion: Number(process.env.ZENITH_BOT_PROTOCOL_VERSION ?? "2169"),
+  version: process.env.ZENITH_BOT_VERSION ?? "1.26.60",
+  protocolVersion: Number(process.env.ZENITH_BOT_PROTOCOL_VERSION ?? "2225"),
   timeoutMs: Number(process.env.ZENITH_SMOKE_TIMEOUT_MS ?? "30000"),
 };
 

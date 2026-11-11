@@ -12,11 +12,9 @@ Mixing Node/TS into the server tree blurs leaf boundaries and review surface. Th
 
 | Zenith (`ServerIdentity`) | Bot `version` (packet schema) | Bot `protocolVersion` (what's on the wire) |
 |---------------------------|--------------------------------|---------------------------------------------|
-| Protocol **2169** / VersionName **1.26.50** | `1.26.40` — nearest `bedrock-protocol` actually ships | `2169` — overridden post-`createClient()`, see below |
+| Protocol **2225** / VersionName **1.26.62** | `1.26.60` � shipped by `bedrock-protocol@3.61` / `minecraft-data@3.119` | `2225` � the same number, no override |
 
-**Deliberate mismatch, not a bug.** No release of `bedrock-protocol` (nor its `minecraft-data` dependency) has cataloged protocol 2169 yet — checked directly against the latest of both (`bedrock-protocol@3.58.0`, `minecraft-data@3.113.0`): newest available is **1.26.40 / protocol 2168**. This isn't specific to this library — gophertunnel, `bedrock-v/protocol`, and Endstone are all at 2168 too (zenith ADR §81); nobody in the ecosystem has 2169 yet.
-
-`client.ts` / `join.ts` set `client.options.protocolVersion = 2169` right after `bedrock.createClient()` returns (before any handshake bytes are actually sent — `protocolVersion` is read lazily). This makes the bot claim Zenith's real protocol number, passing Zenith's exact-match `ProtocolGate`, while its packet serializer/deserializer stays on the nearest real schema the library ships (`1.26.40`).
+The bot speaks the real schema now (no more deliberate mismatch). `bedrock-protocol@3.61` still has two modelling gaps against the real wire, so `src/protocolPatch.ts` fixes them in memory before any client is created: `InventoryTransaction.legacy_transactions` is modelled as an `option` (stray leading byte) while the real wire carries it only when `legacy_request_id != 0`. Also remember (call sites already do): `PlayerAuthInput.input_data` is an **array of flag names**, an empty item (`airItem()`) still carries every `ItemV4` field, and item-use transactions carry `hand`.
 
 **What this does and doesn't validate:** everything **not** on Zenith's Cereal-migration list (`docs/roadmap.md` in the zenith repo — join, place, break, inventory, chests, dig timing, persist, gravity, sound, …) is validated for real. Packets Zenith has migrated to the 2169 Cereal shape (`AddPlayerPacket`, `AddItemActorPacket`, `SetActorDataPacket` as of zenith ADR §82; more as that list closes) are encoded/decoded by this bot using the *old* pre-2168 shape — a decode error on one of those specific packets is not proof of a Zenith bug, it may just be this bot's own staleness. Override with `ZENITH_BOT_VERSION` / `ZENITH_BOT_PROTOCOL_VERSION` if needed.
 
@@ -69,8 +67,7 @@ DIFF_REFERENCE_PROTOCOL_VERSION=2168 \
 bun run smoke:differential-join
 ```
 
-The reference default protocol is 2168 because `bedrock-protocol` currently ships the 1.26.40
-schema. A reference that requires an unsupported schema is reported as **INCONCLUSIVE** — never
+The reference default protocol is 2168 (the 1.26.40 schema this reference client was built on). A reference that requires an unsupported schema is reported as **INCONCLUSIVE** — never
 as a Zenith gameplay regression.
 
 | Script | Id |
@@ -103,8 +100,8 @@ as a Zenith gameplay regression.
 | `ZENITH_PORT` | `19132` |
 | `ZENITH_BOT_USERNAME` | per-smoke default |
 | `ZENITH_BOT_A` / `ZENITH_BOT_B` | two-client / skin |
-| `ZENITH_BOT_VERSION` | `1.26.40` |
-| `ZENITH_BOT_PROTOCOL_VERSION` | `2169` |
+| `ZENITH_BOT_VERSION` | `1.26.60` |
+| `ZENITH_BOT_PROTOCOL_VERSION` | `2225` |
 | `ZENITH_SMOKE_TIMEOUT_MS` | `30000` |
 | `ZENITH_PROJECT` | (optional) zenith checkout for persist auto-restart |
 | `ZENITH_SMOKE_PERSIST_PHASE` | `auto` \| `place` \| `verify` |

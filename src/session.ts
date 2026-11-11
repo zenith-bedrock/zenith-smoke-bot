@@ -26,8 +26,16 @@ export type SmokeSession = {
   gameMode?: number;
 };
 
-export function airItem(): { network_id: 0 } {
-  return { network_id: 0 };
+/** Invalid/empty item. Cereal-era (2193+) ItemV4 always carries every field; only Id is fixed at 0. */
+export function airItem(): Record<string, unknown> {
+  return {
+    network_id: 0,
+    count: 0,
+    metadata: 0,
+    has_stack_id: 0,
+    block_runtime_id: 0,
+    extra: { has_nbt: false, can_place_on: [], can_destroy: [] },
+  };
 }
 
 /** Convert inventory ItemV4 (or sparse) into AuthInput / InventoryTransaction `Item`. */

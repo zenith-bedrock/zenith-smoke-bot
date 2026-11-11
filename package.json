@@ -39,7 +39,7 @@
     "bun": ">=1.1"
   },
   "dependencies": {
-    "bedrock-protocol": "^3.58.0",
+    "bedrock-protocol": "^3.61.0",
     "jsp-raknet": "^2.2.0"
   },
   "devDependencies": {

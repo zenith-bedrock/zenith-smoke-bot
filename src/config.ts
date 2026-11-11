@@ -1,3 +1,5 @@
+import { patchBedrockProtocol } from "./protocolPatch.ts";
+
 /**
  * Shared env for Zenith protocol smokes.
  *
@@ -23,8 +25,11 @@ export const config = {
   port: Number(process.env.ZENITH_PORT ?? "19132"),
   username: process.env.ZENITH_BOT_USERNAME ?? "ZenithSmoke",
   /** Nearest bedrock-protocol-supported build — NOT what's claimed on the wire, see above. */
-  version: process.env.ZENITH_BOT_VERSION ?? "1.26.40",
+  version: process.env.ZENITH_BOT_VERSION ?? "1.26.60",
   /** What's actually sent as client_protocol / protocol_version — must match ServerIdentity.ProtocolVersion. */
-  protocolVersion: Number(process.env.ZENITH_BOT_PROTOCOL_VERSION ?? "2169"),
+  protocolVersion: Number(process.env.ZENITH_BOT_PROTOCOL_VERSION ?? "2225"),
   timeoutMs: Number(process.env.ZENITH_SMOKE_TIMEOUT_MS ?? "30000"),
 } as const;
+
+/* Must run before any createClient(): fixes the library schema for the real wire. */
+patchBedrockProtocol(config.version);

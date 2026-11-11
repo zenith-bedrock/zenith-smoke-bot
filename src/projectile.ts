@@ -3,7 +3,7 @@ import bedrock from "bedrock-protocol";
 import { writeAuthInput } from "./actions.ts";
 import { config } from "./config.ts";
 import { rakBackend, type SmokeClient } from "./client.ts";
-import { finish, smokeBanner, waitForPacket, waitMs } from "./session.ts";
+import { airItem, finish, smokeBanner, waitForPacket, waitMs } from "./session.ts";
 
 type Observation = { runtimeId: bigint | number | string; moves: number; removes: number };
 
@@ -49,7 +49,7 @@ function fireAttackUse(client: SmokeClient) {
       legacy: { legacy_request_id: 0 }, transaction_type: "item_use", actions: [],
       transaction_data: {
         action_type: "attack", trigger_type: "player_input", block_position: { x: 0, y: -60, z: 0 },
-        face: 0, hotbar_slot: 0, held_item: { network_id: 0 }, player_pos: { x: 0, y: -60, z: 0 },
+        face: 0, hotbar_slot: 0, hand: "main_hand", held_item: airItem(), player_pos: { x: 0, y: -60, z: 0 },
         click_pos: { x: 0.5, y: 0.5, z: 0.5 }, block_runtime_id: 0,
         client_prediction: "success", client_cooldown_state: "off",
       },
